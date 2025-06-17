@@ -20,12 +20,19 @@
         }
         .year-label {
             padding-right: 10px;
-            font-size: 0.8rem;
-            color: #666;
+            font-size: 1.0rem;
+            color: #000;
             width: 40px;
             text-align: right;
         }
         .week-count {
+            padding-right: 10px;
+            font-size: 0.7rem;
+            color: #222;
+            width: 30px;
+            text-align: right;
+        }
+        .week-passed-count {
             padding-right: 10px;
             font-size: 0.7rem;
             color: #999;
@@ -91,7 +98,7 @@
                         <h2 class="text-xl font-semibold mb-4 text-gray-700">Visualization</h2>
                         <p class="text-sm text-gray-500 mb-4">Each row represents one year of your life. Each dot is one week.</p>
                         
-                        <div id="calendar-container" class="overflow-auto max-h-96 p-2">
+                        <div id="calendar-container" class="overflow-auto p-4">
                             <div id="calendar">
                                 <!-- Year rows with dots will be generated here -->
                             </div>
@@ -177,29 +184,13 @@
                 const ageInWeeks = ageInMilliseconds / (1000 * 60 * 60 * 24 * 7);
                 const currentYearIndex = currentYear - birthYear;
                 
-                // Create passed years row (all gray)
+                // Create passed years summary
                 if (currentYearIndex > 0) {
-                    const passedRow = document.createElement('div');
-                    passedRow.className = 'year-row';
-                    
-                    const passedLabel = document.createElement('div');
-                    passedLabel.className = 'year-label';
-                    passedLabel.textContent = `${birthYear}-${currentYear - 1}`;
-                    passedRow.appendChild(passedLabel);
-                    
-                    const passedCount = document.createElement('div');
-                    passedCount.className = 'week-count';
-                    passedCount.textContent = currentYearIndex * 52;
-                    passedRow.appendChild(passedCount);
-                    
-                    const passedContainer = document.createElement('div');
-                    for (let i = 0; i < 52; i++) {
-                        const dot = document.createElement('div');
-                        dot.className = 'dot bg-gray-300';
-                        passedContainer.appendChild(dot);
-                    }
-                    passedRow.appendChild(passedContainer);
-                    calendar.appendChild(passedRow);
+                    const passedWeeks = Math.floor((ageInWeeks) - (ageInWeeks % 52));
+                    const passedSummary = document.createElement('div');
+                    passedSummary.className = 'text-center py-4 text-gray-600';
+                    passedSummary.textContent = `You have spent ${passedWeeks} weeks from ${birthYear}`;
+                    calendar.appendChild(passedSummary);
                 }
                 
                 // Create current year row (mixed)
@@ -211,53 +202,45 @@
                 currentLabel.textContent = currentYear;
                 currentRow.appendChild(currentLabel);
                 
-                const currentCount = document.createElement('div');
-                currentCount.className = 'week-count';
-                currentRow.appendChild(currentCount);
+                const passedCount = document.createElement('div');
+                passedCount.className = 'week-passed-count';
+                currentRow.appendChild(passedCount);
+                
                 
                 const currentContainer = document.createElement('div');
-                let weeksRemaining = 0;
-                for (let week = 0; week < 52; week++) {
+                const currentYearWeeks = Math.ceil(ageInWeeks % 52);
+                const weeksRemaining = 52 - currentYearWeeks;
+
+                passedCount.textContent = currentYearWeeks > 0 ? currentYearWeeks : '';
+                
+                // Add passed weeks in current year
+                for (let week = 0; week < currentYearWeeks; week++) {
                     const dot = document.createElement('div');
-                    dot.className = 'dot';
-                    
-                    const totalWeek = currentYearIndex * 52 + week;
-                    if (totalWeek < ageInWeeks) {
-                        dot.classList.add('bg-gray-300');
-                    } else {
-                        dot.classList.add('bg-black');
-                        weeksRemaining++;
-                    }
+                    dot.className = 'dot bg-gray-300';
+                    currentContainer.appendChild(dot);
+                }
+                
+                // Add remaining weeks in current year
+                for (let week = 0; week < weeksRemaining; week++) {
+                    const dot = document.createElement('div');
+                    dot.className = 'dot bg-black';
                     currentContainer.appendChild(dot);
                 }
                 
                 currentRow.appendChild(currentContainer);
+                const currentCount = document.createElement('div');
+                currentCount.className = 'week-count';
+                currentRow.appendChild(currentCount);
                 currentCount.textContent = weeksRemaining > 0 ? weeksRemaining : '';
                 calendar.appendChild(currentRow);
                 
-                // Create future years row (all black)
+                // Create future years summary
                 if (currentYearIndex < totalYears - 1) {
-                    const futureRow = document.createElement('div');
-                    futureRow.className = 'year-row';
-                    
-                    const futureLabel = document.createElement('div');
-                    futureLabel.className = 'year-label';
-                    futureLabel.textContent = `${currentYear + 1}-${birthYear + totalYears - 1}`;
-                    futureRow.appendChild(futureLabel);
-                    
-                    const futureCount = document.createElement('div');
-                    futureCount.className = 'week-count';
-                    futureCount.textContent = (totalYears - currentYearIndex - 1) * 52;
-                    futureRow.appendChild(futureCount);
-                    
-                    const futureContainer = document.createElement('div');
-                    for (let i = 0; i < 52; i++) {
-                        const dot = document.createElement('div');
-                        dot.className = 'dot bg-black';
-                        futureContainer.appendChild(dot);
-                    }
-                    futureRow.appendChild(futureContainer);
-                    calendar.appendChild(futureRow);
+                    const futureWeeks = (totalYears - currentYearIndex - 1) * 52;
+                    const futureSummary = document.createElement('div');
+                    futureSummary.className = 'text-center py-4 text-gray-600';
+                    futureSummary.textContent = `You have ${futureWeeks} weeks left until ${birthYear + totalYears - 1}`;
+                    calendar.appendChild(futureSummary);
                 }
             }
             
