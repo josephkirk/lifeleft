@@ -170,49 +170,94 @@
                 const today = new Date();
                 const totalYears = lifeExpectancy;
                 const birthYear = birthdate.getFullYear();
+                const currentYear = today.getFullYear();
                 
                 // Calculate weeks lived
                 const ageInMilliseconds = today - birthdate;
                 const ageInWeeks = ageInMilliseconds / (1000 * 60 * 60 * 24 * 7);
+                const currentYearIndex = currentYear - birthYear;
                 
-                // Generate a row for each year
-                for (let year = 0; year < totalYears; year++) {
-                    const yearRow = document.createElement('div');
-                    yearRow.className = 'year-row';
+                // Create passed years row (all gray)
+                if (currentYearIndex > 0) {
+                    const passedRow = document.createElement('div');
+                    passedRow.className = 'year-row';
                     
-                    // Add year label
-                    const yearLabel = document.createElement('div');
-                    yearLabel.className = 'year-label';
-                    yearLabel.textContent = birthYear + year;
-                    yearRow.appendChild(yearLabel);
+                    const passedLabel = document.createElement('div');
+                    passedLabel.className = 'year-label';
+                    passedLabel.textContent = `${birthYear}-${currentYear - 1}`;
+                    passedRow.appendChild(passedLabel);
                     
-                    // Add week count for this year
-                    const weekCount = document.createElement('div');
-                    weekCount.className = 'week-count';
-                    yearRow.appendChild(weekCount);
+                    const passedCount = document.createElement('div');
+                    passedCount.className = 'week-count';
+                    passedCount.textContent = currentYearIndex * 52;
+                    passedRow.appendChild(passedCount);
                     
-                    // Add 52 weeks (dots) for each year
-                    let weeksRemainingThisYear = 0;
-                    const weeksContainer = document.createElement('div');
-                    for (let week = 0; week < 52; week++) {
+                    const passedContainer = document.createElement('div');
+                    for (let i = 0; i < 52; i++) {
                         const dot = document.createElement('div');
-                        dot.className = 'dot';
-                        
-                        const totalWeek = year * 52 + week;
-                        if (totalWeek < ageInWeeks) {
-                            dot.classList.add('bg-gray-300');
-                        } else {
-                            dot.classList.add('bg-black');
-                            weeksRemainingThisYear++;
-                        }
-                        
-                        dot.title = `Year ${birthYear + year}, Week ${week + 1}`;
-                        weeksContainer.appendChild(dot);
+                        dot.className = 'dot bg-gray-300';
+                        passedContainer.appendChild(dot);
                     }
+                    passedRow.appendChild(passedContainer);
+                    calendar.appendChild(passedRow);
+                }
+                
+                // Create current year row (mixed)
+                const currentRow = document.createElement('div');
+                currentRow.className = 'year-row';
+                
+                const currentLabel = document.createElement('div');
+                currentLabel.className = 'year-label';
+                currentLabel.textContent = currentYear;
+                currentRow.appendChild(currentLabel);
+                
+                const currentCount = document.createElement('div');
+                currentCount.className = 'week-count';
+                currentRow.appendChild(currentCount);
+                
+                const currentContainer = document.createElement('div');
+                let weeksRemaining = 0;
+                for (let week = 0; week < 52; week++) {
+                    const dot = document.createElement('div');
+                    dot.className = 'dot';
                     
-                    yearRow.appendChild(weeksContainer);
-                    weekCount.textContent = weeksRemainingThisYear > 0 ? weeksRemainingThisYear : '';
-                    calendar.appendChild(yearRow);
+                    const totalWeek = currentYearIndex * 52 + week;
+                    if (totalWeek < ageInWeeks) {
+                        dot.classList.add('bg-gray-300');
+                    } else {
+                        dot.classList.add('bg-black');
+                        weeksRemaining++;
+                    }
+                    currentContainer.appendChild(dot);
+                }
+                
+                currentRow.appendChild(currentContainer);
+                currentCount.textContent = weeksRemaining > 0 ? weeksRemaining : '';
+                calendar.appendChild(currentRow);
+                
+                // Create future years row (all black)
+                if (currentYearIndex < totalYears - 1) {
+                    const futureRow = document.createElement('div');
+                    futureRow.className = 'year-row';
+                    
+                    const futureLabel = document.createElement('div');
+                    futureLabel.className = 'year-label';
+                    futureLabel.textContent = `${currentYear + 1}-${birthYear + totalYears - 1}`;
+                    futureRow.appendChild(futureLabel);
+                    
+                    const futureCount = document.createElement('div');
+                    futureCount.className = 'week-count';
+                    futureCount.textContent = (totalYears - currentYearIndex - 1) * 52;
+                    futureRow.appendChild(futureCount);
+                    
+                    const futureContainer = document.createElement('div');
+                    for (let i = 0; i < 52; i++) {
+                        const dot = document.createElement('div');
+                        dot.className = 'dot bg-black';
+                        futureContainer.appendChild(dot);
+                    }
+                    futureRow.appendChild(futureContainer);
+                    calendar.appendChild(futureRow);
                 }
             }
             
